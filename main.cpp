@@ -1,89 +1,100 @@
 #include <iostream>
 #include <vector>
+#include <chrono>
+#include <random>
+
 using namespace std;
 
-// Since we want to use a "standardized" version of merge sort, I have taken code from geeksforgeeks.
 
 
-// Source: https://www.geeksforgeeks.org/dsa/merge-sort/
-void merge(vector<int>& arr, int left, int mid, int right) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
+// g++ -O0 main.cpp iterativeMerge.cpp recursiveMerge.cpp -o test_O0
+// g++ -O2 main.cpp iterativeMerge.cpp recursiveMerge.cpp -o test_O2
+// g++ -O3 main.cpp iterativeMerge.cpp recursiveMerge.cpp -o test_O3
 
-    vector<int> L(n1), R(n2);
+void mergeSortIterative(vector<int>& arr);
+void mergeSortRecursive(vector<int>& arr, int left, int right);
 
-    for (int i = 0; i < n1; i++) L[i] = arr[left + i];
-    for (int j = 0; j < n2; j++) R[j] = arr[mid + 1 + j];
 
-    int i = 0, j = 0, k = left;
 
-    while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) arr[k++] = L[i++];
-        else arr[k++] = R[j++];
+void fillRandom(vector<int>& arr){
+    static std::mt19937 rng(12345);  
+    std::uniform_int_distribution<int> dist(0, 1000000);
+
+    for (int &x : arr)
+        x = dist(rng);
+}
+
+
+void fillSorted(vector<int>& arr){
+    for (int i = 0; i < (int)arr.size(); i++)
+        arr[i] = i;
+}
+
+void fillReverse(vector<int>& arr){
+    for (int i =  0; i < (int)arr.size(); i++)
+        arr[i] = arr.size() - i;
+}
+
+void cpuWarmup() {
+    cout << "warming up" << endl;
+
+   
+    vector<int> arr(2000000);
+
+    for (int i = 0; i < 2; i++) {
+        fillRandom(arr);
+        mergeSortIterative(arr);  
     }
 
-    while (i < n1) arr[k++] = L[i++];
-    while (j < n2) arr[k++] = R[j++];
-}
 
-
-// Recursive Merge Sort
-// Source: https://www.geeksforgeeks.org/dsa/merge-sort/
-
-void mergeSortRecursive(vector<int>& arr, int left, int right) {
-    if (left >= right) return;
-
-    int mid = left + (right - left) / 2;
-
-    mergeSortRecursive(arr, left, mid);
-    mergeSortRecursive(arr, mid + 1, right);
-
-    merge(arr, left, mid, right);
-}
-
-
-// Iterative (Bottom-Up) Merge Sort
-// Source: https://www.geeksforgeeks.org/dsa/iterative-merge-sort/
-void mergeSortIterative(vector<int>& arr) {
-    int n = arr.size();
-
-    // size = size of subarray to merge
-    for (int size = 1; size < n; size *= 2) {
-        for (int left = 0; left < n - size; left += 2 * size) {
-            int mid = left + size - 1;
-            int right = min(left + 2 * size - 1, n - 1);
-
-            merge(arr, left, mid, right);
-        }
-    }
+    cout << "warmup done\n";
 }
 
 
 
-// Print array helper
-void printArray(const vector<int>& arr) {
-    for (int x : arr) cout << x << " ";
-    cout << "\n";
-}
-
-
-// Main to test both sorts
 int main() {
-    vector<int> data1 = {12, 4, 7, 9, 2, 15, 1};
-    vector<int> data2 = data1;
 
-    cout << "Original: ";
-    printArray(data1);
 
-    // Recursive
-    mergeSortRecursive(data1, 0, data1.size() - 1);
-    cout << "Recursive sorted: ";
-    printArray(data1);
+    cpuWarmup();
 
-    // Iterative
-    mergeSortIterative(data2);
-    cout << "Iterative sorted: ";
-    printArray(data2);
+    vector<int> sizes = {2000000, 4000000, 8000000, 16000000};
 
+    for (int n : sizes){
+        cout << "\n==============================\n";
+        cout << "Array size: " << n << "\n";
+
+        vector<int> arr1(n), arr2(n);
+
+    
+        fillSorted(arr1);
+        arr2 = arr1;  
+
+       //iterative
+        auto start = chrono::high_resolution_clock::now();
+        mergeSortIterative(arr1);
+        auto end = chrono::high_resolution_clock::now();
+
+        auto iterative_time =
+            chrono::duration_cast<chrono::microseconds>(end - start).count();
+
+        cout << "Iterative time: " << iterative_time << " microseconds\n";
+
+       //recursive
+        start = chrono::high_resolution_clock::now();
+        mergeSortRecursive(arr2, 0, arr2.size() - 1);
+        end = chrono::high_resolution_clock::now();
+
+        auto recursive_time =
+            chrono::duration_cast<chrono::microseconds>(end - start).count();
+
+        cout << "Recursive time: " << recursive_time << " microseconds\n";
+    }
+
+
+    cout << "\nDone\n";
     return 0;
+
+
+
+
 }
