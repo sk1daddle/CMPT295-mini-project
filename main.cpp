@@ -26,7 +26,7 @@ void fillRandom(vector<int>& arr){
 
 
 void fillSorted(vector<int>& arr){
-    for (int i = 0; i < (int)arr.size(); i++)
+    for (int i =  0; i < (int)arr.size(); i++)
         arr[i] = i;
 }
 
@@ -35,15 +35,16 @@ void fillReverse(vector<int>& arr){
         arr[i] = arr.size() - i;
 }
 
-void cpuWarmup() {
+void cpuWarmup(){
     cout << "warming up" << endl;
 
    
     vector<int> arr(2000000);
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++){
         fillRandom(arr);
         mergeSortIterative(arr);  
+
     }
 
 
@@ -52,49 +53,86 @@ void cpuWarmup() {
 
 
 
-int main() {
-
-
+int main(){ 
     cpuWarmup();
 
     vector<int> sizes = {2000000, 4000000, 8000000, 16000000};
+    const char* testRandom = "Random";
+    const char* testSorted = "Sorted";
+    const char* testReverse = "Reverse-sorted";
 
-    for (int n : sizes){
-        cout << "\n==============================\n";
+    for (int n : sizes) {
+
+        cout << "\n====================================================\n";
         cout << "Array size: " << n << "\n";
 
         vector<int> arr1(n), arr2(n);
 
-    
-        fillSorted(arr1);
-        arr2 = arr1;  
+        //random
+        fillRandom(arr1);
+        arr2 = arr1;
 
-       //iterative
+        cout << "\n" << testRandom << " array\n";
+
         auto start = chrono::high_resolution_clock::now();
         mergeSortIterative(arr1);
         auto end = chrono::high_resolution_clock::now();
+        
+        cout << "Iterative time: "
+            << chrono::duration_cast<chrono::microseconds>(end - start).count()
+            << " microseconds\n";
 
-        auto iterative_time =
-            chrono::duration_cast<chrono::microseconds>(end - start).count();
-
-        cout << "Iterative time: " << iterative_time << " microseconds\n";
-
-       //recursive
         start = chrono::high_resolution_clock::now();
-        mergeSortRecursive(arr2, 0, arr2.size() - 1);
+        mergeSortRecursive(arr2, 0, n - 1);
         end = chrono::high_resolution_clock::now();
 
-        auto recursive_time =
-            chrono::duration_cast<chrono::microseconds>(end - start).count();
+        cout << "Recursive time: "
+            << chrono::duration_cast<chrono::microseconds>(end - start).count()
+            << " microseconds\n";
 
-        cout << "Recursive time: " << recursive_time << " microseconds\n";
+
+        //sorted
+        fillSorted(arr1);
+        arr2 = arr1;
+
+        cout << "\n" << testSorted << " array\n";
+
+        start = chrono::high_resolution_clock::now();
+        mergeSortIterative(arr1);
+        end = chrono::high_resolution_clock::now();
+        cout << "Iterative time: "
+            << chrono::duration_cast<chrono::microseconds>(end - start).count()
+            << " microseconds\n";
+
+        start = chrono::high_resolution_clock::now();
+        mergeSortRecursive(arr2, 0, n - 1);
+        end = chrono::high_resolution_clock::now();
+        cout << "Recursive time: "
+            << chrono::duration_cast<chrono::microseconds>(end - start).count()
+            << " microseconds\n";
+
+
+        //reverse sorted
+        fillReverse(arr1);
+        arr2 = arr1;
+
+        cout << "\n" << testReverse << " array\n";
+
+        start = chrono::high_resolution_clock::now();
+        mergeSortIterative(arr1);
+        end = chrono::high_resolution_clock::now();
+        cout << "Iterative time: "
+            << chrono::duration_cast<chrono::microseconds>(end - start).count()
+            << " microseconds\n";
+
+        start = chrono::high_resolution_clock::now();
+        mergeSortRecursive(arr2, 0, n - 1);
+        end = chrono::high_resolution_clock::now();
+        cout << "Recursive time: "
+            << chrono::duration_cast<chrono::microseconds>(end - start).count()
+            << " microseconds\n";
     }
-
 
     cout << "\nDone\n";
     return 0;
-
-
-
-
 }
